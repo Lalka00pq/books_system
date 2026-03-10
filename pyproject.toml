@@ -4,4 +4,17 @@ version = "0.1.0"
 description = "A simple book management system."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn",
+    "sqlalchemy[asyncio]",
+    "asyncpg",
+    "alembic",
+    "pydantic",
+    "pydantic-settings",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "bcrypt<4.1.0",
+    "python-multipart",
+    "psycopg>=3.3.3",
+]
