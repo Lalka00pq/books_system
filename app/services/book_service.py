@@ -60,9 +60,11 @@ class BookService:
         )
         db.add(user_book)
         await db.commit()
-        await db.refresh(user_book)
+        
         # Load book details for response
-        return await db.get(UserBook, user_book.id, options=[selectinload(UserBook.book)])
+        stmt = select(UserBook).options(selectinload(UserBook.book)).where(UserBook.id == user_book.id).execution_options(populate_existing=True)
+        res = await db.execute(stmt)
+        return res.scalar_one()
 
     @staticmethod
     async def update_user_book(
@@ -71,7 +73,7 @@ class BookService:
         user_id: uuid.UUID, 
         data: UserBookUpdate
     ) -> UserBook:
-        stmt = select(UserBook).where(UserBook.id == association_id, UserBook.id == user_id)
+        stmt = select(UserBook).where(UserBook.id == association_id, UserBook.user_id == user_id)
         result = await db.execute(stmt)
         user_book = result.scalar_one_or_none()
         if not user_book:
@@ -79,8 +81,10 @@ class BookService:
 
         user_book.status = data.status
         await db.commit()
-        await db.refresh(user_book)
-        return await db.get(UserBook, user_book.id, options=[selectinload(UserBook.book)])
+        
+        stmt = select(UserBook).options(selectinload(UserBook.book)).where(UserBook.id == user_book.id).execution_options(populate_existing=True)
+        res = await db.execute(stmt)
+        return res.scalar_one()
 
     @staticmethod
     async def remove_user_book(db: AsyncSession, association_id: uuid.UUID, user_id: uuid.UUID) -> None:
