@@ -10,6 +10,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+
 @router.post("/login", response_model=TokenResponse)
 async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)) -> Any:
     user = await AuthService.authenticate_user(db, login_data)
@@ -19,8 +20,7 @@ async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)) ->
         "token_type": "bearer"
     }
 
+
 @router.post("/logout")
 async def logout(current_user: User = Depends(get_current_user)) -> dict:
-    # Since we are using stateless JWT tokens, true logout relies on client-side deletion, 
-    # but the assignment requires the endpoint to exist.
     return {"message": "Successfully logged out"}
