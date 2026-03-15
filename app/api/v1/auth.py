@@ -1,10 +1,11 @@
 from typing import Any
 from fastapi import APIRouter, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.services.auth_service import AuthService
-from app.core.security import create_access_token
+from app.core.security import create_access_token, revoke_token
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
 
@@ -21,6 +22,15 @@ async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)) ->
     }
 
 
+security = HTTPBearer()
+
+
 @router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)) -> dict:
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    current_user: User = Depends(get_current_user)
+) -> dict:
+    token = credentials.credentials
+    revoke_token(token)
+
     return {"message": "Successfully logged out"}

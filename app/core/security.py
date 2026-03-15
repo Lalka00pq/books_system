@@ -1,3 +1,4 @@
+from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from jose import jwt, JWTError
@@ -7,28 +8,58 @@ from app.core.exceptions import UnauthorizedError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+
+revoked_token_jtis: set[str] = set()
+
 
 def create_access_token(subject: str | Any, expires_delta: timedelta | None = None) -> str:
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        expire = datetime.now(
+            timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    jti = str(uuid4())
+    to_encode = {"exp": expire, "sub": str(subject), "jti": jti}
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
+
 
 def decode_access_token(token: str) -> str:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY,
+                             algorithms=[settings.ALGORITHM])
         user_id = payload.get("sub")
-        if user_id is None:
+        jti = payload.get("jti")
+
+        if user_id is None or jti is None:
             raise UnauthorizedError("Invalid token payload")
+
+        if jti in revoked_token_jtis:
+            raise UnauthorizedError("Token has been revoked")
+
         return user_id
+    except JWTError:
+        raise UnauthorizedError("Invalid token")
+
+
+def revoke_token(token: str) -> None:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[
+                             settings.ALGORITHM], options={"verify_exp": False})
+        jti = payload.get("jti")
+        if jti is None:
+            raise UnauthorizedError("Invalid token payload")
+
+        revoked_token_jtis.add(jti)
     except JWTError:
         raise UnauthorizedError("Invalid token")
