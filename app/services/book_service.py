@@ -36,7 +36,18 @@ class BookService:
             raise NotFoundError(f"Book with id {book_id} not found in catalog")
         return book
 
-    # --- User's Personal Book List (Entities for the assignment) ---
+    @staticmethod
+    async def get_user_book_by_id(db: AsyncSession, association_id: uuid.UUID, user_id: uuid.UUID) -> UserBook:
+        stmt = select(UserBook).options(selectinload(UserBook.book)).where(
+            UserBook.id == association_id,
+            UserBook.user_id == user_id
+        )
+        result = await db.execute(stmt)
+        user_book = result.scalar_one_or_none()
+        if not user_book:
+            raise NotFoundError("Entry not found in your list")
+        return user_book
+
     @staticmethod
     async def get_user_books(db: AsyncSession, user_id: uuid.UUID) -> List[UserBook]:
         stmt = select(UserBook).where(UserBook.user_id ==
@@ -54,7 +65,6 @@ class BookService:
                                       user_id, UserBook.book_id == data.book_id)
         result = await db.execute(stmt)
         if result.scalar_one_or_none():
-            # Using 404/400 as appropriate
             raise NotFoundError("Book already in your list")
 
         user_book = UserBook(

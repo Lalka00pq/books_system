@@ -45,7 +45,7 @@ def decode_access_token(token: str) -> str:
             raise UnauthorizedError("Invalid token payload")
 
         if jti in revoked_token_jtis:
-            raise UnauthorizedError("Token has been revoked")
+            raise UnauthorizedError("Unauthorized")
 
         return user_id
     except JWTError:

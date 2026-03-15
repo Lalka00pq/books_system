@@ -16,7 +16,7 @@ async def get_my_books(
     current_user: User = Depends(get_current_user)
 ) -> List[UserBookResponse]:
     """Get list of books in user's personal collection."""
-    return await BookService.get_user_books(db, current_user.id)
+    return await BookService.get_user_books(db, current_user.id)  # type: ignore
 
 
 @router.get("/{association_id}", response_model=UserBookResponse)
@@ -26,7 +26,7 @@ async def get_my_book(
     current_user: User = Depends(get_current_user)
 ) -> UserBookResponse:
     """Get details of a specific book in user's collection."""
-    return await BookService.get_book_by_id(db, association_id)
+    return await BookService.get_user_book_by_id(db, association_id, current_user.id)  # type: ignore
 
 
 @router.post("", response_model=UserBookResponse, status_code=status.HTTP_201_CREATED)
@@ -36,7 +36,7 @@ async def add_book_to_my_list(
     current_user: User = Depends(get_current_user)
 ) -> UserBookResponse:
     """Associate a book from catalog with user's collection."""
-    return await BookService.add_book_to_user(db, current_user.id, data)
+    return await BookService.add_book_to_user(db, current_user.id, data)  # type: ignore
 
 
 @router.put("/{association_id}", response_model=UserBookResponse)
