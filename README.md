@@ -264,3 +264,21 @@ PATCH /api/v1/catalog/patch_catalog/{id}
 ```
 Удаление книги из каталога (доступно только для админов):
 DELETE /api/v1/catalog/delete_from_catalog/{id} id - id книги в каталоге (таблица books)
+
+## Структура проекта
+```
+├── .env - файл с переменными окружения
+├── .gitignore - файл игнорирования
+├── alembic.ini - конфигурация alembic
+├── alembic - alembic миграции
+├── app - приложение
+│    ├── api - Endpoints
+│    ├── core - логика приложения
+│    ├── database - база данных
+│    ├── models - модели данных
+│    ├── schemas - схемы данных для валидации
+│    ├── services - сервисы
+│    ├── main.py - файл запуска приложения
+│    ├── config.py - конфигурация приложения
+│    ├── dependencies.py - зависимости
+```
