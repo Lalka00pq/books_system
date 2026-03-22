@@ -67,11 +67,11 @@
 3. Создайте виртуальное окружение:
    Для MacOS/Linux:
    ```bash
-   python3 -m venv venv
+   python3 -m venv .venv
    ```
    Активируем окружение:
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
    Устанавливаем зависимости:
    Использование pip:
@@ -84,11 +84,11 @@
    ```
    Для Windows:
    ```bash
-   python -m venv venv
+   python -m venv .venv
    ```   
    Активируем окружение:
    ```bash
-   venv\Scripts\activate
+   .venv\Scripts\activate
    ```
    Устанавливаем зависимости:
    Использование pip:
